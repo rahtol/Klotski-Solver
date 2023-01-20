@@ -101,21 +101,25 @@ class Boardstate:
         nx = []
         occ = self.get_cell_occupation(left(idx))
         if occ == 1:
-            nx = [[0 if i == idx - 1 else 1 if i == idx else x for i, x in enumerate(self.cells)]]
+            nx = [[0 if i == left(idx) else
+                   1 if i == idx else
+                   x for i, x in enumerate(self.cells)]]
         elif occ == 2:
-            # the cell [idx-1] that was proven to belong to a 2x1 pieced must be top cell of that piece
+            # the cell [left(idx)] that was proven to belong to a 2x1 piece must be top cell of that piece
             # which is the case if either the cell [idx-5] is not part of a 2x1 piece
             #                      or the two cells above form a separate 2x1 pice
             above2 = self.get_cell_occupation(up(left(idx)))
             aboveabove2 = self.get_cell_occupation(up(up(left(idx))))
-            if self.get_cell_occupation(down(idx)) == 0 and (above2 != 2 or (above2 == 2 and aboveabove2 == 2)):
-                nx = [[0 if i in [idx - 1, idx + 3] else
-                       2 if i in [idx, idx + 4] else
+            if self.get_cell_occupation(down(idx)) == 0 and \
+                    self.get_cell_occupation(down(left(idx))) == 2 and \
+                    (above2 != 2 or (above2 == 2 and aboveabove2 == 2)):
+                nx = [[0 if i in [left(idx), left(down(idx))] else
+                       2 if i in [idx, down(idx)] else
                        x for i, x in enumerate(self.cells)]]
         elif occ == 4:
             if self.get_cell_occupation(down(idx)) == 0 and self.get_cell_occupation(down(left(idx))) == 4:
-                nx = [[0 if i in [idx - 2, idx + 2] else
-                       4 if i in [idx, idx + 4] else
+                nx = [[0 if i in [left(left(idx)), left(left(down(idx)))] else
+                       4 if i in [idx, down(idx)] else
                        x for i, x in enumerate(self.cells)]]
         return nx
 
@@ -130,7 +134,9 @@ class Boardstate:
         elif occ == 2:
             above2 = self.get_cell_occupation(up(right(idx)))
             aboveabove2 = self.get_cell_occupation(up(up(right(idx))))
-            if self.get_cell_occupation(down(idx)) == 0 and (above2 != 2 or (above2 == 2 and aboveabove2 == 2)):
+            if self.get_cell_occupation(down(idx)) == 0 and \
+                    self.get_cell_occupation((down(right(idx)))) == 2 and \
+                    (above2 != 2 or (above2 == 2 and aboveabove2 == 2)):
                 nx = [[0 if i in [right(idx), right(down(idx))] else
                        2 if i in [idx, down(idx)] else
                        x for i, x in enumerate(self.cells)]]
@@ -155,12 +161,11 @@ class Boardstate:
                 next_cellarrays.extend(self.find_admissible_right_move(idx))
         return next_cellarrays
 
-
-def print_boardstate(boardstate):
-    print(f'----')
-    for row in range(5):
-        print(
-            f'{boardstate[row * 4]:d}{boardstate[row * 4 + 1]:d}{boardstate[row * 4 + 2]:d}{boardstate[row * 4 + 3]:d}')
+    def print(self, no):
+        print(f'{no:03d}----')
+        for row in range(5):
+            print(
+                f'{self.cells[row * 4]:d} {self.cells[row * 4 + 1]:d} {self.cells[row * 4 + 2]:d} {self.cells[row * 4 + 3]:d}')
 
 
 initial_boardstate = Boardstate([2, 4, 4, 2,
@@ -172,4 +177,4 @@ initial_boardstate = Boardstate([2, 4, 4, 2,
 if __name__ == '__main__':
     nx_states = initial_boardstate.find_admissible_moves()
     for m in nx_states:
-        print_boardstate(m)
+        m.print(1)
