@@ -1,6 +1,11 @@
 # cellstate is represented by list of 20 integers where
 #   idx = row * 4 * col, i.e. col = idx %4, row = idx // 4 with rages raw 0..3, col 0..4
-#   cells[idx] = 0, 1, 2, 4 with 0=empy cell, 1,2,4=cell occupied by piece of respectiv size
+#   cells[idx] = 0, 1, 2, 3, 4 with
+#       0=empy cell,
+#       1= cell occupied by 1x1 piece
+#       2= cell occupied by 2x1 piece, vertical piece of size 2
+#       3= cell occupied by 1x2 piece, horizontal piece of size 2
+#       4= cell occupied by 2x2 piece, the red one
 
 def up(idx: int) -> int:
     if idx >= 4:
@@ -70,6 +75,11 @@ class Boardstate:
             nx = [[0 if i == up(up(idx)) else
                    2 if i == idx else
                    x for i, x in enumerate(self.cells)]]
+        elif occ == 3:
+            if self.get_cell_occupation(right(idx)) == 0 and self.get_cell_occupation(up(right(idx))) == 3:
+                nx = [[0 if i in [up(idx), right(up(idx))] else
+                       3 if i in [idx, right(idx)] else
+                       x for i, x in enumerate(self.cells)]]
         elif occ == 4:
             if self.get_cell_occupation(right(idx)) == 0 and self.get_cell_occupation(up(right(idx))) == 4:
                 nx = [[0 if i in [up(up(idx)), up(up(right(idx)))] else
@@ -89,6 +99,11 @@ class Boardstate:
             nx = [[0 if i == down(down(idx)) else
                    2 if i == idx else
                    x for i, x in enumerate(self.cells)]]
+        elif occ == 3:
+            if self.get_cell_occupation(right(idx)) == 0 and self.get_cell_occupation(down(right(idx))) == 3:
+                nx = [[0 if i in [down(idx), right(down(idx))] else
+                       3 if i in [idx, right(idx)] else
+                       x for i, x in enumerate(self.cells)]]
         elif occ == 4:
             if self.get_cell_occupation(right(idx)) == 0 and self.get_cell_occupation(down(right(idx))) == 4:
                 nx = [[0 if i in [down(down(idx)), down(down(right(idx)))] else
@@ -116,6 +131,10 @@ class Boardstate:
                 nx = [[0 if i in [left(idx), left(down(idx))] else
                        2 if i in [idx, down(idx)] else
                        x for i, x in enumerate(self.cells)]]
+        elif occ == 3:
+            nx = [[0 if i == left(left(idx)) else
+                   3 if i == idx else
+                   x for i, x in enumerate(self.cells)]]
         elif occ == 4:
             if self.get_cell_occupation(down(idx)) == 0 and self.get_cell_occupation(down(left(idx))) == 4:
                 nx = [[0 if i in [left(left(idx)), left(left(down(idx)))] else
@@ -140,6 +159,10 @@ class Boardstate:
                 nx = [[0 if i in [right(idx), right(down(idx))] else
                        2 if i in [idx, down(idx)] else
                        x for i, x in enumerate(self.cells)]]
+        elif occ == 3:
+            nx = [[0 if i == right(right(idx)) else
+                   3 if i == idx else
+                   x for i, x in enumerate(self.cells)]]
         elif occ == 4:
             if self.get_cell_occupation(down(idx)) == 0 and self.get_cell_occupation(down(right(idx))) == 4:
                 nx = [[0 if i in [right(right(idx)), right(right(down(idx)))] else
@@ -162,15 +185,16 @@ class Boardstate:
         return next_cellarrays
 
     def print(self, no):
-        print(f'{no:03d}----')
+        print(f'--{no:03d}-- ', end='')
         for row in range(5):
             print(
-                f'{self.cells[row * 4]:d} {self.cells[row * 4 + 1]:d} {self.cells[row * 4 + 2]:d} {self.cells[row * 4 + 3]:d}')
+                f'{self.cells[row * 4]:d}{self.cells[row * 4 + 1]:d}{self.cells[row * 4 + 2]:d}{self.cells[row * 4 + 3]:d}', end=' ')
+        print('')
 
 
 initial_boardstate = Boardstate([2, 4, 4, 2,
                                  2, 4, 4, 2,
-                                 2, 1, 1, 2,
+                                 2, 3, 3, 2,
                                  2, 1, 1, 2,
                                  1, 0, 0, 1])
 
