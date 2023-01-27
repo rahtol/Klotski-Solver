@@ -191,6 +191,21 @@ class Boardstate:
                 f'{self.cells[row * 4]:d}{self.cells[row * 4 + 1]:d}{self.cells[row * 4 + 2]:d}{self.cells[row * 4 + 3]:d}', end=' ')
         print('')
 
+    # the left-top cell of a piece is defined to be the master cell of that piece
+    def is_master_cell_of_piece(self, i:int) -> bool:
+        rc = False
+        if self.cells[i] == 1:
+            rc = True
+        elif self.cells[i] == 2:
+            above2 = self.get_cell_occupation(up(i))
+            aboveabove2 = self.get_cell_occupation(up(up(i)))
+            return self.get_cell_occupation(down(i)) == 2 and (above2 != 2 or (above2 == 2 and aboveabove2 == 2))
+        elif self.cells[i] == 3:
+            return self.get_cell_occupation(right(i)) == 3
+        elif self.cells[i] == 4:
+            return self.get_cell_occupation(right(down(i))) == 4
+        return rc
+
 
 initial_boardstate = Boardstate([2, 4, 4, 2,
                                  2, 4, 4, 2,
