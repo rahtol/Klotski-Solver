@@ -4,8 +4,9 @@ import re
 
 
 def bs_from_str(s: str):
-    m = re.match(r'[-*]{2}\d{3}[-*]{2} ([0-4]{4}) ([0-4]{4}) ([0-4]{4}) ([0-4]{4}) ([0-4]{4})', s)
-    assert m
+    m = re.match(r'[-*]{2}\d{3}[-*]{2} ([0-4]{4}) ([0-4]{4}) ([0-4]{4}) ([0-4]{4}) ([0-4]{4})\n?', s)
+    if not m:
+        return None  # input string does not specify a boardstate
     cells = []
     for row in range(5):
         s_row = m.group(row + 1)
@@ -59,5 +60,6 @@ def test1(marked_states):
                 bs2.print(i)
 
 
-ms, sol = solve()
-test1(ms)
+if __name__ == '__main__':
+    ms, sol = solve()
+    test1(ms)
