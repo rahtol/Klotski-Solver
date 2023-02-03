@@ -1,3 +1,6 @@
+import re
+
+
 # cellstate is represented by list of 20 integers where
 #   idx = row * 4 * col, i.e. col = idx %4, row = idx // 4 with rages raw 0..3, col 0..4
 #   cells[idx] = 0, 1, 2, 3, 4 with
@@ -6,6 +9,14 @@
 #       2= cell occupied by 2x1 piece, vertical piece of size 2
 #       3= cell occupied by 1x2 piece, horizontal piece of size 2
 #       4= cell occupied by 2x2 piece, the red one
+
+def xy_from_idx(idx: int) -> (int, int):
+    return idx % 4, idx // 4
+
+
+def xy_to_idx(x: int, y: int) -> int:
+    return y * 4 + x
+
 
 def up(idx: int) -> int:
     if idx >= 4:
@@ -188,11 +199,12 @@ class Boardstate:
         print(f'--{no:03d}-- ', end='')
         for row in range(5):
             print(
-                f'{self.cells[row * 4]:d}{self.cells[row * 4 + 1]:d}{self.cells[row * 4 + 2]:d}{self.cells[row * 4 + 3]:d}', end=' ')
+                f'{self.cells[row * 4]:d}{self.cells[row * 4 + 1]:d}{self.cells[row * 4 + 2]:d}{self.cells[row * 4 + 3]:d}',
+                end=' ')
         print('')
 
     # the left-top cell of a piece is defined to be the master cell of that piece
-    def is_master_cell_of_piece(self, i:int) -> bool:
+    def is_master_cell_of_piece(self, i: int) -> bool:
         rc = False
         if self.cells[i] == 1:
             rc = True
@@ -205,6 +217,20 @@ class Boardstate:
         elif self.cells[i] == 4:
             return self.get_cell_occupation(right(down(i))) == 4
         return rc
+
+
+def bs_from_str(s: str):
+    m = re.match(r'[-*]{2}\d{3}[-*]{2} ([0-4]{4}) ([0-4]{4}) ([0-4]{4}) ([0-4]{4}) ([0-4]{4})\n?', s)
+    if not m:
+        return None  # input string does not specify a boardstate
+    cells = []
+    for row in range(5):
+        s_row = m.group(row + 1)
+        for col in range(4):
+            val = int(s_row[col])
+            cells.append(val)
+    bs = Boardstate(cells)
+    return bs
 
 
 initial_boardstate = Boardstate([2, 4, 4, 2,

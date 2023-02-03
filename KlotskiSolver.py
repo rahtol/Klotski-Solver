@@ -3,20 +3,6 @@ import boardstate
 import re
 
 
-def bs_from_str(s: str):
-    m = re.match(r'[-*]{2}\d{3}[-*]{2} ([0-4]{4}) ([0-4]{4}) ([0-4]{4}) ([0-4]{4}) ([0-4]{4})\n?', s)
-    if not m:
-        return None  # input string does not specify a boardstate
-    cells = []
-    for row in range(5):
-        s_row = m.group(row + 1)
-        for col in range(4):
-            val = int(s_row[col])
-            cells.append(val)
-    bs = boardstate.Boardstate(cells)
-    return bs
-
-
 def path_to(bs):
     p = bs
     path = []
@@ -50,7 +36,7 @@ def solve():
 
 def test1(marked_states):
     #    bs = bs_from_str('--007-- 2442 2442 0233 1212 1012')
-    bs = bs_from_str('**047** 1112 2442 2442 2002 2133')
+    bs = boardstate.bs_from_str('**047** 1112 2442 2442 2002 2133')
     t = bs in marked_states
     print(t)
     for x in marked_states:

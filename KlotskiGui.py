@@ -1,7 +1,8 @@
 import tkinter as tk
 from boardstate import Boardstate
-from KlotskiSolver import bs_from_str
+from boardstate import xy_from_idx
 from boardmove import detect_move
+import boardstate_sequence
 
 CELLSIZE = 100
 
@@ -33,22 +34,12 @@ def create_pieces(master):
     return pieces
 
 
-def read_boardstate_sequence_from_file(fn: str):
-    boardstate_sequence = []
-    with open(fn, 'r') as f:
-        for line in f:
-            bs = bs_from_str(line)
-            if bs is not None:
-                boardstate_sequence.append(bs)
-    return boardstate_sequence
-
-
 class KlotskiGui:
     boardstate_sequence_fn = 'shortest-solution.txt'
 
     def __init__(self, master):
         master.title("Klotski Gui")
-        self.boardstate_sequence = read_boardstate_sequence_from_file(self.boardstate_sequence_fn)
+        self.boardstate_sequence = boardstate_sequence.read_from_file(self.boardstate_sequence_fn)
         self.stepcounter = 0
         self.master = master
         self.main = tk.Frame(self.master)
@@ -66,26 +57,25 @@ class KlotskiGui:
         self.prev.pack(side=tk.RIGHT, padx=20)
         self.main.pack()
 
-    def find_piece(self, idx: int) -> Boardstate:
-        x = idx % 4
-        y = idx // 4
-        cand = [p for p in self.pieces if p.x <= x < p.x + p.dx and p.y <= y < p.y + p.dy]
-        assert len(cand) == 1
-        return cand [0]
+    def find_piece(self, idx: int) -> Piece:
+        x, y = xy_from_idx(idx)
+        candidates = [p for p in self.pieces if p.x <= x < p.x + p.dx and p.y <= y < p.y + p.dy]
+        assert len(candidates) == 1
+        return candidates[0]
 
-    def place_pieces(self, bs):
+    def place_pieces(self, bs: Boardstate):
         for idx in range(20):
             if bs.is_master_cell_of_piece(idx):
                 # pick first available piece of appropriate typecode
                 piece = [p for p in self.pieces if p.typecode == bs.cells[idx] and not p.placed][0]
                 piece.placed = True  # make it unavailable
-                piece.x = idx % 4
-                piece.y = idx // 4
+                piece.x, piece.y = xy_from_idx(idx)
                 piece.place(relx=piece.x / 4, rely=piece.y / 5)
 
     def next_step(self):
-        if self.stepcounter < len(self.boardstate_sequence)-1:
-            move = detect_move(self.boardstate_sequence[self.stepcounter], self.boardstate_sequence[self.stepcounter+1])
+        if self.stepcounter < len(self.boardstate_sequence) - 1:
+            move = detect_move(self.boardstate_sequence[self.stepcounter],
+                               self.boardstate_sequence[self.stepcounter + 1])
             piece = self.find_piece(move.piece_idx)
             piece.x = piece.x + move.dx
             piece.y = piece.y + move.dy
@@ -95,7 +85,8 @@ class KlotskiGui:
 
     def prev_step(self):
         if self.stepcounter > 0:
-            move = detect_move(self.boardstate_sequence[self.stepcounter], self.boardstate_sequence[self.stepcounter-1])
+            move = detect_move(self.boardstate_sequence[self.stepcounter],
+                               self.boardstate_sequence[self.stepcounter - 1])
             piece = self.find_piece(move.piece_idx)
             piece.x = piece.x + move.dx
             piece.y = piece.y + move.dy
