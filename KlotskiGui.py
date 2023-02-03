@@ -3,24 +3,24 @@ from boardstate import Boardstate
 from KlotskiSolver import bs_from_str
 from boardmove import detect_move
 
-cellsize = 100
+CELLSIZE = 100
 
 
 class Piece(tk.Frame):
-    dim = [[0, 0], [1, 1], [2, 1], [1, 2], [2, 2]]
-    bg_color = ['gray25', '#d6e398', '#d6e398', '#d6e398', '#B88']
+    DIM = [[0, 0], [1, 1], [2, 1], [1, 2], [2, 2]]
+    BG_COLOR = ['gray25', '#d6e398', '#d6e398', '#d6e398', '#B88']
 
     def __init__(self, master, typecode):
         self.typecode = typecode
         self.placed = False
         self.x = 0
         self.y = 0
-        self.dx = Piece.dim[typecode][1]
-        self.dy = Piece.dim[typecode][0]
-        super().__init__(master, height=self.dy * cellsize, width=self.dx * cellsize)
+        self.dx = Piece.DIM[typecode][1]
+        self.dy = Piece.DIM[typecode][0]
+        super().__init__(master, height=self.dy * CELLSIZE, width=self.dx * CELLSIZE)
         self.button = tk.Button(self, text='', padx=1, pady=1, borderwidth=2,
-                                relief=tk.SOLID, bg=Piece.bg_color[self.typecode])
-        self.button.place(x=0, y=0, height=self.dy * cellsize - 2, width=self.dx * cellsize - 2)
+                                relief=tk.SOLID, bg=Piece.BG_COLOR[self.typecode])
+        self.button.place(x=0, y=0, height=self.dy * CELLSIZE - 2, width=self.dx * CELLSIZE - 2)
 
 
 def create_pieces(master):
@@ -52,7 +52,7 @@ class KlotskiGui:
         self.stepcounter = 0
         self.master = master
         self.main = tk.Frame(self.master)
-        self.board = tk.Frame(self.main, height=5 * cellsize, width=4 * cellsize)
+        self.board = tk.Frame(self.main, height=5 * CELLSIZE, width=4 * CELLSIZE)
         self.pieces = create_pieces(self.board)
         self.place_pieces(self.boardstate_sequence[0])
         self.control = tk.Frame(self.main)
@@ -85,19 +85,23 @@ class KlotskiGui:
 
     def next_step(self):
         if self.stepcounter < len(self.boardstate_sequence)-1:
-            self.stepcounter = self.stepcounter + 1
-            self.stepcounter_label.configure(text=f'#{self.stepcounter}')
             move = detect_move(self.boardstate_sequence[self.stepcounter], self.boardstate_sequence[self.stepcounter+1])
             piece = self.find_piece(move.piece_idx)
             piece.x = piece.x + move.dx
             piece.y = piece.y + move.dy
             piece.place(relx=piece.x / 4, rely=piece.y / 5)
+            self.stepcounter = self.stepcounter + 1
+            self.stepcounter_label.configure(text=f'#{self.stepcounter}')
 
     def prev_step(self):
         if self.stepcounter > 0:
+            move = detect_move(self.boardstate_sequence[self.stepcounter], self.boardstate_sequence[self.stepcounter-1])
+            piece = self.find_piece(move.piece_idx)
+            piece.x = piece.x + move.dx
+            piece.y = piece.y + move.dy
+            piece.place(relx=piece.x / 4, rely=piece.y / 5)
             self.stepcounter = self.stepcounter - 1
             self.stepcounter_label.configure(text=f'#{self.stepcounter}')
-        pass
 
 
 root = tk.Tk()
