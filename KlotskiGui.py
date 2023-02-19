@@ -35,7 +35,8 @@ def create_pieces(master):
 
 
 class KlotskiGui:
-    boardstate_sequence_fn = 'shortest-solution.txt'
+#    boardstate_sequence_fn = 'youtube-solution.txt'
+    boardstate_sequence_fn = 'solution-117-1.txt'
 
     def __init__(self, master):
         master.title("Klotski Gui")

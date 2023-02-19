@@ -74,6 +74,24 @@ class Boardstate:
     def is_final(self):
         return self.cells[13] == 4 and self.cells[18] == 4
 
+    def get_piece_reference_idx(self, idx: int) -> int:
+        assert 0 < self.cells[idx] <= 4
+        if self.cells[idx] == 1:
+            reference_idx = idx
+        elif self.cells[idx] == 2:
+            above = self.get_cell_occupation(up(idx))
+            below = self.get_cell_occupation(down(idx))
+            belowbelow = self.get_cell_occupation(down(down(idx)))
+            reference_idx = idx if above != 2 or (below == 2 and belowbelow != 2) else up(idx)
+        elif self.cells[idx] == 3:
+            reference_idx = idx if self.get_cell_occupation(left(idx)) != 3 else left(idx)
+        elif self.cells[idx] == 4:
+            reference_idx = idx if self.get_cell_occupation(left(idx)) != 4 else left(idx)
+            reference_idx = reference_idx if self.get_cell_occupation(up(reference_idx)) != 4 else up(reference_idx)
+        assert 0 <= reference_idx <= 19
+        assert self.cells[idx] == self.cells[reference_idx]
+        return reference_idx
+
     def find_admissible_down_move(self, idx):
         assert (self.cells[idx] == 0)
         nx = []
@@ -203,6 +221,14 @@ class Boardstate:
                 end=' ')
         print('')
 
+    def __str__(self):
+        s = ''
+        for row in range(5):
+            for col in range(4):
+                s = s + f'{self.cells[row * 4 + col ]}'
+            s = s + ' '
+        return s[:-1]
+
     # the left-top cell of a piece is defined to be the master cell of that piece
     def is_master_cell_of_piece(self, i: int) -> bool:
         rc = False
@@ -238,8 +264,3 @@ initial_boardstate = Boardstate([2, 4, 4, 2,
                                  2, 3, 3, 2,
                                  2, 1, 1, 2,
                                  1, 0, 0, 1])
-
-if __name__ == '__main__':
-    nx_states = initial_boardstate.find_admissible_moves()
-    for m in nx_states:
-        m.print(1)
