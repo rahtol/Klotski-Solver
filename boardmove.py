@@ -17,6 +17,9 @@ class Boardmove:
         assert 0 <= idx_out <= 19
         return idx_out
 
+    def is_double_move(self) -> bool:
+        return abs(self.dx) + abs(self.dy) > 1
+
 
 def detect_move(bs0: Boardstate, bs1: Boardstate) -> Boardmove:
     cleared = [idx for idx in range(20) if bs0.cells[idx] != 0 and bs1.cells[idx] == 0]

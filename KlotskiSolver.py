@@ -50,12 +50,11 @@ def test1(marked_states):
 
 if __name__ == '__main__':
     marked_boardstates, solutions = solve()
-    solution_counts = {117: 0, 118: 0, 119:0, 120:0}
+    solution_counts = {80: 0, 81: 0, 82: 0, 83: 0}
     for solution in solutions:
         l: int = len(solution)
-        if l < 120:
-            solution_counts[l] = solution_counts[l] +1
+        if l < 83:
+            solution_counts[l] = solution_counts[l] + 1
             count: int = solution_counts[l]
             fn = f'solution-{l:d}-{count:d}.txt'
             write_to_file(solution, fn)
-

@@ -92,18 +92,50 @@ class Boardstate:
         assert self.cells[idx] == self.cells[reference_idx]
         return reference_idx
 
+    def double_move_type1(self, idx, first_move_inverted):
+        # idx: cell where the type1 piece is located after first move
+        # first_move_inverted: direction to be excluded for the second move because it would restore the original state
+        nx2 = []
+        for direction in [up, down, left, right]:
+            if direction != first_move_inverted and self.get_cell_occupation(direction(idx)) == 0:
+                nx2.append([0 if i == first_move_inverted(idx) else
+                            1 if i == direction(idx) else
+                            x for i, x in enumerate(self.cells)])
+        return nx2
+        pass
+
+    def double_move_type2(self, idx, first_move_inverted):
+        nx2 = []
+        for direction in [up, down]:
+            if direction != first_move_inverted and self.get_cell_occupation(direction(idx)) == 0:
+                nx2.append([0 if i in [first_move_inverted(idx), first_move_inverted(first_move_inverted(idx))] else
+                            2 if i in [idx, direction(idx)] else
+                            x for i, x in enumerate(self.cells)])
+        return nx2
+
+    def double_move_type3(self, idx, first_move_inverted):
+        nx2 = []
+        for direction in [left, right]:
+            if direction != first_move_inverted and self.get_cell_occupation(direction(idx)) == 0:
+                nx2.append([0 if i in [first_move_inverted(idx), first_move_inverted(first_move_inverted(idx))] else
+                            3 if i in [idx, direction(idx)] else
+                            x for i, x in enumerate(self.cells)])
+        return nx2
+
     def find_admissible_down_move(self, idx):
         assert (self.cells[idx] == 0)
         nx = []
         occ = self.get_cell_occupation(up(idx))
         if occ == 1:
-            nx = [[0 if i == up(idx) else
-                   1 if i == idx else
-                   x for i, x in enumerate(self.cells)]]
+            nx.append([0 if i == up(idx) else
+                       1 if i == idx else
+                       x for i, x in enumerate(self.cells)])
+            nx.extend(self.double_move_type1(idx, up))
         elif occ == 2:
             nx = [[0 if i == up(up(idx)) else
                    2 if i == idx else
                    x for i, x in enumerate(self.cells)]]
+            nx.extend(self.double_move_type2(idx, up))
         elif occ == 3:
             if self.get_cell_occupation(right(idx)) == 0 and self.get_cell_occupation(up(right(idx))) == 3:
                 nx = [[0 if i in [up(idx), right(up(idx))] else
@@ -124,10 +156,12 @@ class Boardstate:
             nx = [[0 if i == down(idx) else
                    1 if i == idx else
                    x for i, x in enumerate(self.cells)]]
+            nx.extend(self.double_move_type1(idx, down))
         elif occ == 2:
             nx = [[0 if i == down(down(idx)) else
                    2 if i == idx else
                    x for i, x in enumerate(self.cells)]]
+            nx.extend(self.double_move_type2(idx, down))
         elif occ == 3:
             if self.get_cell_occupation(right(idx)) == 0 and self.get_cell_occupation(down(right(idx))) == 3:
                 nx = [[0 if i in [down(idx), right(down(idx))] else
@@ -148,6 +182,7 @@ class Boardstate:
             nx = [[0 if i == left(idx) else
                    1 if i == idx else
                    x for i, x in enumerate(self.cells)]]
+            nx.extend(self.double_move_type1(idx, left))
         elif occ == 2:
             # the cell [left(idx)] that was proven to belong to a 2x1 piece must be top cell of that piece
             # which is the case if either the cell [idx-5] is not part of a 2x1 piece
@@ -164,6 +199,7 @@ class Boardstate:
             nx = [[0 if i == left(left(idx)) else
                    3 if i == idx else
                    x for i, x in enumerate(self.cells)]]
+            nx.extend(self.double_move_type3(idx, left))
         elif occ == 4:
             if self.get_cell_occupation(down(idx)) == 0 and self.get_cell_occupation(down(left(idx))) == 4:
                 nx = [[0 if i in [left(left(idx)), left(left(down(idx)))] else
@@ -179,6 +215,7 @@ class Boardstate:
             nx = [[0 if i == right(idx) else
                    1 if i == idx else
                    x for i, x in enumerate(self.cells)]]
+            nx.extend(self.double_move_type1(idx, right))
         elif occ == 2:
             above2 = self.get_cell_occupation(up(right(idx)))
             aboveabove2 = self.get_cell_occupation(up(up(right(idx))))
@@ -192,6 +229,7 @@ class Boardstate:
             nx = [[0 if i == right(right(idx)) else
                    3 if i == idx else
                    x for i, x in enumerate(self.cells)]]
+            nx.extend(self.double_move_type3(idx, right))
         elif occ == 4:
             if self.get_cell_occupation(down(idx)) == 0 and self.get_cell_occupation(down(right(idx))) == 4:
                 nx = [[0 if i in [right(right(idx)), right(right(down(idx)))] else
@@ -225,7 +263,7 @@ class Boardstate:
         s = ''
         for row in range(5):
             for col in range(4):
-                s = s + f'{self.cells[row * 4 + col ]}'
+                s = s + f'{self.cells[row * 4 + col]}'
             s = s + ' '
         return s[:-1]
 

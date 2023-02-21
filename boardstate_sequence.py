@@ -14,10 +14,10 @@ def read_from_file(fn: str):
 
 def write_to_file(boardstate_sequence: [Boardstate], fn: str):
     with open(fn, 'w') as f:
-        i: int = 0
-        for bs in boardstate_sequence:
-            f.write(f'--{i:03d}-- {bs}\n')
-            i = i + 1
+        for i, bs in enumerate(boardstate_sequence):
+            move = detect_move(boardstate_sequence[i], boardstate_sequence[i-1]) if i > 0 else None
+            c: str = '**' if move is not None and move.is_double_move() else '--'
+            f.write(f'{c}{i:03d}{c} {bs}\n')
 
 
 def normalize(boardstate_sequence_in: [Boardstate]) -> [Boardstate]:
