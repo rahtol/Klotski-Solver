@@ -10,7 +10,7 @@ class Boardmove:
         self.cleared = cleared
         self.occupied = occupied
 
-    def map_idx(self,idx=-99):
+    def map_idx(self, idx=-99):
         if idx == -99:
             idx = self.piece_idx
         idx_out = idx + self.dx + 4 * self.dy
